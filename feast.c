@@ -37,18 +37,63 @@ void print_state();
 */
 int serve_dishes( ) {
 
+    int cnt = 0;
 
+    while(true)
+    {
+        int order = get_next_dish_order();
+        platter* lu = platters;
+        if(order == -1)
+        {
+            return cnt;
+        }
 
+        for(int i = 0; i < 5; ++i)
+        {
+            if((platters + i) && (platters + i)->uses < lu->uses)
+            {
+                lu = platters + i;
+            }
+
+            if((platters + i) && (platters + i)->dish == order)
+            {
+                (platters + i)->uses++;
+                break;
+            }
+
+            if((platters + i)->dish == -1)
+            {
+                cnt++;
+                (platters + i)->dish = order;
+                (platters + i)->uses = 0;
+                break;
+            }
+
+            if(i == 4)
+            {
+                cnt++;
+                lu->dish = order;
+                lu->uses = 0;
+            }
+        }
+        print_state();
+    }
 }
 
 int main( int argc, char** argv ) {
 
     /* Allocate and initialize platters */
+    platters = calloc(sizeof(platter), 5);
+    for(int i = 0; i < 5; ++i)
+    {
+        (platters+i)->dish = -1;
+    }
     
     int fetches = serve_dishes(); 
     printf("Bilbo had to fetch dishes %d times using LFU.\n", fetches );
     
     /* Deallocate platters */
+    free(platters);
     
     return 0;
 }
